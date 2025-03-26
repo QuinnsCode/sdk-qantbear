@@ -1,0 +1,70 @@
+{
+  // Schema reference
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Worker name
+  "name": "rw-sdk-test-do",
+
+  // Entry point
+  "main": "src/worker.tsx",
+
+  // Compatibility settings
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Assets configuration
+  "assets": {
+    "binding": "ASSETS"
+  },
+
+  // Observability settings
+  "observability": {
+    "enabled": true
+  },
+
+  // Durable Objects configuration
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "REALTIME_DURABLE_OBJECT",
+        "class_name": "RealtimeDurableObject"
+      },
+      {
+        "name": "NOTE_DURABLE_OBJECT",
+        "class_name": "NoteDurableObject"
+      },
+      {
+        "name": "GAME_DURABLE_OBJECT",
+        "class_name": "GameDurableObject"
+      }
+    ]
+  },
+
+  // Environment variables
+  "vars": {
+    "APP_NAME": "_rw-sdk-test-do"
+  },
+
+  // Migrations configuration
+  
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["RealtimeDurableObject", "NoteDurableObject"]
+    },
+    {
+      "tag": "v2",
+      "new_classes": ["GameDurableObject"]
+    }
+  ],
+  
+
+  // D1 database configuration
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "swanky-onsite-db2",
+      "database_id": "f5bf3e46-5a51-4412-908d-57b747e7c2e8"
+    }
+  ]
+}
