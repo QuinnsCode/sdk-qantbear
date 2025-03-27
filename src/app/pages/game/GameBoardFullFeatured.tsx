@@ -14,30 +14,6 @@ export const GameBoard = ({
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteStatus, setInviteStatus] = useState('');
-  const [userId, setUserId] = useState('');
-
-  // Get the userId from URL parameters or cookies
-  useEffect(() => {
-    // Check URL parameters first
-    const urlParams = new URLSearchParams(window.location.search);
-    let id = urlParams.get('userId');
-    
-    // If not in URL, check cookies
-    if (!id) {
-      const cookies = document.cookie.split('; ');
-      const userIdCookie = cookies.find(cookie => cookie.startsWith('userId='));
-      if (userIdCookie) {
-        id = userIdCookie.split('=')[1];
-      }
-    }
-    
-    // If still no userId, we have a problem
-    if (!id) {
-      console.error("No userId found. Game updates won't work.");
-    } else {
-      setUserId(id);
-    }
-  }, []);
 
   // Always take the latest version from the server
   useEffect(() => {
@@ -50,23 +26,20 @@ export const GameBoard = ({
     setCurrentLetter(randomLetter);
   }, []);
 
-  const debouncedUpdate = useCallback((newBoard: string[]) => {
-    if (!userId) {
-      console.error("No userId available. Can't update board.");
-      return;
-    }
-    
-    console.log("Updating board on server with:", newBoard, "userId:", userId);
-    updateBoard(gameId, newBoard).catch(error => {
-      console.error("Error updating board:", error);
-    });
-  }, [gameId, userId]);
+  const debouncedUpdate = useCallback(
+    debounce(async (newBoard: string[]) => {
+      try {
+        await updateBoard(gameId, newBoard);
+      } catch (error) {
+        console.error("Error updating board:", error);
+      }
+    }, 100),
+    [gameId],
+  );
 
   const handleCellClick = (index: number) => {
-    console.log(`Cell ${index} clicked with letter ${currentLetter}`);
     const newBoard = [...board];
     newBoard[index] = currentLetter;
-    console.log("Updated local board:", newBoard);
     setBoard(newBoard); // Always update local state
     debouncedUpdate(newBoard); // Send the latest version
   };
@@ -97,7 +70,12 @@ export const GameBoard = ({
     }
     
     try {
-      const currentUrl = window.location.href;
+      const currentUrl = window?.location?.href;
+
+      if (!currentUrl) {
+        setInviteStatus('Failed to open email client. Please try again.');
+        return;
+      }
       
       // Create email content
       const subject = "Invitation to join my game";
@@ -450,7 +428,7 @@ export const GameBoard = ({
         }
       `}</style>
       <div className="game-info">
-        <h1 className="game-title">Game: {gameId} {userId ? `(${userId.substring(0, 6)}...)` : ''}</h1>
+        <h1 className="game-title">Game: {gameId}</h1>
         <div className="player-letter">
           Choose a Letter: 
           <select 

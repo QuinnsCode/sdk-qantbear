@@ -21,7 +21,7 @@ export type Context = {};
 
 export default defineApp<Context>([
   setCommonHeaders(),
-  realtimeRoute((env) => env.REALTIME_DURABLE_OBJECT),
+  // realtimeRoute((env) => env.REALTIME_DURABLE_OBJECT),
   layout(Document, [
     route("/", () => {
       const randomName = uniqueNamesGenerator({
