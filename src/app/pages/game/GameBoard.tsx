@@ -41,9 +41,6 @@ export const GameBoard = ({
     debouncedUpdate(newBoard); // Send the latest version
   };
 
-
-  
-
   return (
     <div className="page-container">
       <style jsx>{`
