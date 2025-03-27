@@ -11,7 +11,6 @@ export const GameBoard = ({
   const { gameId, initialBoard } = props;
   const [board, setBoard] = useState(initialBoard || Array(9).fill(null));
   const [currentLetter, setCurrentLetter] = useState('X');
-  const [userId, setUserId] = useState('');
 
   // Always take the latest version from the server
   useEffect(() => {
@@ -42,12 +41,6 @@ export const GameBoard = ({
     debouncedUpdate(newBoard); // Send the latest version
   };
 
-  const handleLetterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCurrentLetter(e.target.value);
-  };
-
-  // Generate all letters from A to Z
-  const letters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
   
 
