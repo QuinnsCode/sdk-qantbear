@@ -58,6 +58,27 @@ export const GameBoard = ({
     setCurrentLetter(randomLetter);
   }, []);
 
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
+    if (hasWon && cooldownSeconds !== null) {
+      intervalId = setInterval(() => {
+        setCooldownSeconds(prevSeconds => {
+          if (prevSeconds === null || prevSeconds <= 1) {
+            setHasWon(false);
+            setWinTimestamp(null);
+            return null;
+          }
+          return prevSeconds - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [hasWon, cooldownSeconds]);
+
   const debouncedUpdate = useCallback(
     debounce(async (newBoard: string[]) => {
       try {
@@ -81,7 +102,6 @@ export const GameBoard = ({
     return boardToCheck.every(cell => cell === firstLetter);
   };
 
-  // Update the celebrate win function
   const celebrateWin = () => {
     // If we already celebrated this win, don't repeat
     if (hasWon) return;
@@ -95,29 +115,6 @@ export const GameBoard = ({
     Object.values(cellTimers.current).forEach(timer => clearTimeout(timer));
     cellTimers.current = {};
     
-    // Set up the countdown timer
-    const countdownInterval = setInterval(() => {
-      setCooldownSeconds(prevSeconds => {
-        if (prevSeconds === null || prevSeconds <= 1) {
-          clearInterval(countdownInterval);
-          setHasWon(false);
-          setWinTimestamp(null);
-          return null;
-        }
-        return prevSeconds - 1;
-      });
-    }, 1000);
-    
-    // Store the interval for cleanup
-    const intervalId = countdownInterval as unknown as number;
-    
-    // Clean up when component unmounts
-    useEffect(() => {
-      return () => {
-        if (intervalId) clearInterval(intervalId);
-      };
-    }, [intervalId]);
-    
     // Confetti animation
     if (!confetti || typeof window === 'undefined') {
       // Fallback if confetti isn't available
@@ -127,22 +124,22 @@ export const GameBoard = ({
     
     const duration = 3000;
     const end = currentTime + duration;
-
+  
     (function frame() {
       confetti({
-        particleCount: 7,
+        particleCount: 30, // Increased for more dramatic effect
         angle: 60,
         spread: 55,
         origin: { x: 0.05, y: 0.65 }
       });
       
       confetti({
-        particleCount: 7,
+        particleCount: 30, // Increased for more dramatic effect
         angle: 120,
         spread: 55,
         origin: { x: 0.95, y: 0.65 }
       });
-
+  
       if (Date.now() < end) {
         requestAnimationFrame(frame);
       }
