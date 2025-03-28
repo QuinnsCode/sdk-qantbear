@@ -4,7 +4,7 @@ import { useState } from "react";
 import { inviteStyles } from '../pages/game/styles'; // Update this path to where your styles.ts file is located
 
 // Export the component directly
-export function InviteWidget() {
+export const InviteWidget = () => {
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteStatus, setInviteStatus] = useState('');
@@ -127,5 +127,3 @@ export function InviteWidget() {
     </>
   );
 }
-
-// No default export down here - this was causing the error

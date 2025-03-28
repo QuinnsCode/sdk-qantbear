@@ -1,11 +1,17 @@
-// File: GameBoard.tsx
 "use client";
-import { useCallback, useState, useEffect, useRef } from "react";
+
+import { useCallback, useState, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { updateBoard } from "./functions";
 import { InviteWidget } from "../../components/InviteWidget";
 import { gameStyles } from './styles';
-import confetti from "canvas-confetti";
+// Import confetti conditionally
+let confetti: any = null;
+
+// Check if window is defined (client-side only)
+if (typeof window !== 'undefined') {
+  confetti = require('canvas-confetti').default;
+}
 
 export const GameBoard = ({
   props,
@@ -16,7 +22,12 @@ export const GameBoard = ({
   const [board, setBoard] = useState(initialBoard || Array(9).fill(null));
   const [currentLetter, setCurrentLetter] = useState('A');
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
+  // Check if we're in the browser
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Always take the latest version from the server
   useEffect(() => {
@@ -52,8 +63,10 @@ export const GameBoard = ({
     return boardToCheck.every(cell => cell === firstLetter);
   };
 
-  // Celebrate win with confetti
+  // Celebrate win with confetti - only run client-side
   const celebrateWin = () => {
+    if (!confetti || typeof window === 'undefined') return;
+    
     const duration = 3000;
     const end = Date.now() + duration;
 
@@ -72,7 +85,7 @@ export const GameBoard = ({
         origin: { x: 0.95, y: 0.65 }
       });
 
-      if (Date.now() < end) {
+      if (Date.now() < end && typeof requestAnimationFrame === 'function') {
         requestAnimationFrame(frame);
       }
     }());
@@ -97,48 +110,54 @@ export const GameBoard = ({
   // Generate all letters from A to Z
   const letters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
-  return (
-    <div style={gameStyles.pageContainer}>
-      <InviteWidget />
-      
-      <div style={gameStyles.gameInfo}>
-        <h1 style={gameStyles.gameTitle}>Game: {gameId}</h1>
-        <div style={gameStyles.playerLetter}>
-          Choose a Letter: 
-          <select 
-            style={gameStyles.letterSelector} 
-            value={currentLetter} 
-            onChange={handleLetterChange}
-          >
-            {letters?.map(letter => (
-              <option key={letter} value={letter}>
-                {letter}
-              </option>
-            ))}
-          </select>
+  // Use a try-catch for rendering to help identify issues
+  try {
+    return (
+      <div style={gameStyles?.pageContainer || {}}>
+        {isClient && <InviteWidget />}
+        
+        <div style={gameStyles?.gameInfo || {}}>
+          <h1 style={gameStyles?.gameTitle || {}}>Game: {gameId}</h1>
+          <div style={gameStyles?.playerLetter || {}}>
+            Choose a Letter: 
+            <select 
+              style={gameStyles?.letterSelector || {}} 
+              value={currentLetter} 
+              onChange={handleLetterChange}
+            >
+              {letters?.map(letter => (
+                <option key={letter} value={letter}>
+                  {letter}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
-      
-      <div style={gameStyles.boardContainer}>
-        <div style={gameStyles.woodFrame}>
-          <div style={gameStyles.board}>
-            {board?.map((cell, index) => (
-              <div 
-                key={index} 
-                style={{
-                  ...gameStyles.cell,
-                  ...(hoveredCell === index ? gameStyles.cellHover : {})
-                }}
-                onClick={() => handleCellClick(index)}
-                onMouseEnter={() => setHoveredCell(index)}
-                onMouseLeave={() => setHoveredCell(null)}
-              >
-                {cell || ''}
-              </div>
-            ))}
+        
+        <div style={gameStyles?.boardContainer || {}}>
+          <div style={gameStyles?.woodFrame || {}}>
+            <div style={gameStyles?.board || {}}>
+              {board?.map((cell, index) => (
+                <div 
+                  key={index} 
+                  style={{
+                    ...(gameStyles?.cell || {}),
+                    ...(hoveredCell === index ? gameStyles?.cellHover || {} : {})
+                  }}
+                  onClick={() => handleCellClick(index)}
+                  onMouseEnter={() => isClient && setHoveredCell(index)}
+                  onMouseLeave={() => isClient && setHoveredCell(null)}
+                >
+                  {cell || ''}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } catch (error) {
+    console.error("Render error:", error);
+    return <div>Something went wrong rendering the game board. Please try refreshing.</div>;
+  }
 };
