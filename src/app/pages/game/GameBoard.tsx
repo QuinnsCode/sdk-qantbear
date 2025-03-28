@@ -104,7 +104,6 @@ export const GameBoard = ({
     }());
   };
 
-  // Set a timer to clear a cell after delay
   const setCellResetTimer = (index: number) => {
     // Clear any existing timer for this cell
     if (cellTimers.current[index]) {
@@ -113,10 +112,15 @@ export const GameBoard = ({
     
     // Set new timer to clear the cell after 5 seconds
     cellTimers.current[index] = setTimeout(() => {
-      const newBoard = [...board];
-      newBoard[index] = null;
-      setBoard(newBoard);
-      debouncedUpdate(newBoard);
+      setBoard(prevBoard => {
+        const newBoard = [...prevBoard];
+        newBoard[index] = null;
+        
+        // Update the server after changing the board
+        debouncedUpdate(newBoard);
+        
+        return newBoard;
+      });
       
       // Remove the timer reference
       delete cellTimers.current[index];
