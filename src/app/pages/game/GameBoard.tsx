@@ -29,8 +29,11 @@ export const GameBoard = ({
   //check for hydration
   const [isClient, setIsClient] = useState(false);
 
-  // Add a state to track if we're already in a winning state
+  // Add state for tracking win time
   const [hasWon, setHasWon] = useState(false);
+  const [winTimestamp, setWinTimestamp] = useState<number | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState<number | null>(null);
+  const winCooldownMs = 60 * 1000; // 1 minutes in milliseconds
 
   const cellTimers = useRef<{[key: number]: NodeJS.Timeout}>({});
 
@@ -83,8 +86,39 @@ export const GameBoard = ({
     // If we already celebrated this win, don't repeat
     if (hasWon) return;
     
+    const currentTime = Date.now();
     setHasWon(true);
+    setWinTimestamp(currentTime);
+    setCooldownSeconds(60); // Start at 60 seconds
     
+    // Clear all timers when player wins
+    Object.values(cellTimers.current).forEach(timer => clearTimeout(timer));
+    cellTimers.current = {};
+    
+    // Set up the countdown timer
+    const countdownInterval = setInterval(() => {
+      setCooldownSeconds(prevSeconds => {
+        if (prevSeconds === null || prevSeconds <= 1) {
+          clearInterval(countdownInterval);
+          setHasWon(false);
+          setWinTimestamp(null);
+          return null;
+        }
+        return prevSeconds - 1;
+      });
+    }, 1000);
+    
+    // Store the interval for cleanup
+    const intervalId = countdownInterval as unknown as number;
+    
+    // Clean up when component unmounts
+    useEffect(() => {
+      return () => {
+        if (intervalId) clearInterval(intervalId);
+      };
+    }, [intervalId]);
+    
+    // Confetti animation
     if (!confetti || typeof window === 'undefined') {
       // Fallback if confetti isn't available
       alert(`Congratulations! You filled the board with all ${currentLetter}!`);
@@ -92,11 +126,7 @@ export const GameBoard = ({
     }
     
     const duration = 3000;
-    const end = Date.now() + duration;
-
-    // Clear all timers when player wins
-    Object.values(cellTimers.current).forEach(timer => clearTimeout(timer));
-    cellTimers.current = {};
+    const end = currentTime + duration;
 
     (function frame() {
       confetti({
@@ -116,7 +146,7 @@ export const GameBoard = ({
       if (Date.now() < end) {
         requestAnimationFrame(frame);
       }
-      }());
+    }());
   };
 
   const setCellResetTimer = (index: number) => {
@@ -142,17 +172,26 @@ export const GameBoard = ({
     }, 5000);
   };
 
+  // Update cell click handler
   const handleCellClick = (index: number) => {
     const newBoard = [...board];
+    const oldBoard = [...board];
     newBoard[index] = currentLetter;
     setBoard(newBoard); // Always update local state
     debouncedUpdate(newBoard); // Send the latest version
     
-    // Set timer to reset this cell
-    setCellResetTimer(index);
+    // Check if we're in the win cooldown period
+    const inCooldown = hasWon && winTimestamp && (Date.now() - winTimestamp < winCooldownMs);
+    
+    // Set timer to reset this cell if we're not in the cooldown period
+    if (!inCooldown) {
+      setCellResetTimer(index);
+    }
     
     // Check for win condition after updating the board
-    if (checkWinCondition(newBoard)) {
+    const justWon = checkWinCondition(newBoard) && !checkWinCondition(oldBoard);
+    
+    if (justWon) {
       celebrateWin();
     }
   };
@@ -327,6 +366,20 @@ export const GameBoard = ({
           max-width: 90vmin;
           font-size: 0.9rem;
         }
+
+        .win-message {
+          position: absolute;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: rgba(46, 125, 50, 0.9);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 8px;
+          font-family: 'Georgia', serif;
+          z-index: 100;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
         
         @media (max-width: 768px) {
           .game-title {
@@ -353,6 +406,7 @@ export const GameBoard = ({
             font-size: 0.9rem;
           }
         }
+
       `}</style>
       
       {isClient && <InviteWidget />}
@@ -374,6 +428,12 @@ export const GameBoard = ({
           </select>
         </div>
       </div>
+
+      {cooldownSeconds !== null && (
+        <div className="win-message">
+          You won! The game will resume in {cooldownSeconds} seconds.
+        </div>
+      )}
       
       <div className="board-container">
         <div className="wood-frame">
