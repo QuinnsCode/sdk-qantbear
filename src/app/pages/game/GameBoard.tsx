@@ -58,6 +58,23 @@ export const GameBoard = ({
     setCurrentLetter(randomLetter);
   }, []);
 
+
+  // Add this function to restart timers after cooldown
+  const restartCellTimers = useCallback(() => {
+    // Clear any existing timers first
+    Object.values(cellTimers.current).forEach(timer => clearTimeout(timer));
+    cellTimers.current = {};
+    
+    // Set new timers for all filled cells
+    board.forEach((cell, index) => {
+      if (cell !== null && cell !== '') {
+        setCellResetTimer(index);
+      }
+    });
+  }, [board]);
+
+
+  //this useeffect will restart the timers when the win cooldown is over
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
     
@@ -65,6 +82,8 @@ export const GameBoard = ({
       intervalId = setInterval(() => {
         setCooldownSeconds(prevSeconds => {
           if (prevSeconds === null || prevSeconds <= 1) {
+            // When countdown reaches 0, restart cell timers
+            restartCellTimers();
             setHasWon(false);
             setWinTimestamp(null);
             return null;
@@ -77,7 +96,7 @@ export const GameBoard = ({
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [hasWon, cooldownSeconds]);
+  }, [hasWon, cooldownSeconds, restartCellTimers]);
 
   const debouncedUpdate = useCallback(
     debounce(async (newBoard: string[]) => {
