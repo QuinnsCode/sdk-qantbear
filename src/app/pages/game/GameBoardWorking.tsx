@@ -2,21 +2,22 @@
 import { useCallback, useState, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { updateBoard } from "./functions";
+import { InviteWidget } from "@/app/components/InviteWidget";
 
-export const GameBoard = ({
+export const GameBoardWorking = ({
   props,
 }: {
   props: { initialBoard: string[]; gameId: string };
 }) => {
   const { gameId, initialBoard } = props;
   const [board, setBoard] = useState(initialBoard || Array(9).fill(null));
-  const [currentLetter, setCurrentLetter] = useState('X');
+  const [currentLetter, setCurrentLetter] = useState('A');
 
   // Always take the latest version from the server
   useEffect(() => {
     setBoard(initialBoard || Array(9).fill(null));
   }, [initialBoard]);
-
+  
   // Generate random letter when component mounts
   useEffect(() => {
     const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
@@ -41,9 +42,17 @@ export const GameBoard = ({
     debouncedUpdate(newBoard); // Send the latest version
   };
 
+  const handleLetterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCurrentLetter(e.target.value);
+  };
+
+  // Generate all letters from A to Z
+  const letters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+
   return (
     <div className="page-container">
-      <style jsx>{`
+
+<style jsx>{`
         .page-container {
           display: flex;
           flex-direction: column;
@@ -148,6 +157,30 @@ export const GameBoard = ({
           opacity: 0.7;
         }
         
+        .letter-selector {
+          padding: 8px 12px;
+          font-size: 1rem;
+          font-family: 'Georgia', serif;
+          background-color: #f5f0e1;
+          border: 2px solid #d7b78f;
+          color: #5d4037;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .letter-selector:hover {
+          background-color: #f9f5e8;
+          box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        
+        .player-letter {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        
         @media (max-width: 768px) {
           .game-title {
             font-size: 1.2rem;
@@ -167,19 +200,39 @@ export const GameBoard = ({
           .cell {
             font-size: 2rem;
           }
+          
+          .letter-selector {
+            padding: 6px 8px;
+            font-size: 0.9rem;
+          }
         }
       `}</style>
+      
+      <InviteWidget />
+      
+
       <div className="game-info">
         <h1 className="game-title">Game: {gameId}</h1>
         <div className="player-letter">
-          Your Letter: {currentLetter}
+          Choose a Letter: 
+          <select 
+            className="letter-selector" 
+            value={currentLetter} 
+            onChange={handleLetterChange}
+          >
+            {letters?.map(letter => (
+              <option key={letter} value={letter}>
+                {letter}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       
       <div className="board-container">
         <div className="wood-frame">
           <div className="board">
-            {board.map((cell, index) => (
+            {board?.map((cell, index) => (
               <div 
                 key={index} 
                 className="cell"
