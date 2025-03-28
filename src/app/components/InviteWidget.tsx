@@ -14,7 +14,7 @@ export const InviteWidget = () => {
   };
   
   // Handle email input change
-  const handleEmailChange = (e) => {
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInviteEmail(e.target.value);
   };
   
@@ -190,7 +190,7 @@ export const InviteWidget = () => {
           font-style: italic;
         }
       `}</style>
-      
+
       {showInvite && (
         <>
           <div className="modal-overlay" onClick={toggleInvite}></div>

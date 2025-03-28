@@ -2,7 +2,7 @@
 import { useCallback, useState, useEffect } from "react";
 import debounce from "lodash/debounce";
 import { updateBoard } from "./functions";
-// import { InviteWidget } from "@/app/components/InviteWidget";
+import { InviteWidget } from "@/app/components/InviteWidget";
 
 export const GameBoard = ({
   props,
@@ -51,9 +51,8 @@ export const GameBoard = ({
 
   return (
     <div className="page-container">
-      {/* <InviteWidget /> */}
-      
-      <style jsx>{`
+
+<style jsx>{`
         .page-container {
           display: flex;
           flex-direction: column;
@@ -208,6 +207,9 @@ export const GameBoard = ({
           }
         }
       `}</style>
+      
+      <InviteWidget />
+      
 
       <div className="game-info">
         <h1 className="game-title">Game: {gameId}</h1>
