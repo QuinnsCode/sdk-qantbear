@@ -33,10 +33,13 @@ export const GameBoard = ({
   const [hasWon, setHasWon] = useState(false);
   const [winTimestamp, setWinTimestamp] = useState<number | null>(null);
   const [cooldownSeconds, setCooldownSeconds] = useState<number | null>(null);
-  const winCooldownMs = 60 * 1000; // 1 minutes in milliseconds
+  const winCooldownMs = 30 * 1000; // 30 seconds in milliseconds
 
   const cellTimers = useRef<{[key: number]: NodeJS.Timeout}>({});
 
+  //cheat to re render component after the countdown ends
+  const [renderTick, setRenderTick] = useState(0);
+  
   // Set isClient to true when component mounts on client
   useEffect(() => {
     setIsClient(true);
@@ -176,15 +179,13 @@ export const GameBoard = ({
       setBoard(prevBoard => {
         const newBoard = [...prevBoard];
         newBoard[index] = null;
-        
-        // Update the server after changing the board
         debouncedUpdate(newBoard);
-        
         return newBoard;
       });
-      
-      // Remove the timer reference
       delete cellTimers.current[index];
+      
+      // Force a re-render by incrementing the tick
+      setRenderTick(prev => prev + 1);
     }, 5000);
   }, [debouncedUpdate]);
 
