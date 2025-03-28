@@ -4,7 +4,16 @@ import debounce from "lodash/debounce";
 import { updateBoard } from "./functions";
 import { InviteWidget } from "@/app/components/InviteWidget";
 
-export const GameBoardWorking = ({
+// Import confetti conditionally to prevent server-side errors
+let confetti: any = null;
+if (typeof window !== 'undefined') {
+  // Only import on the client side
+  import('canvas-confetti').then((module) => {
+    confetti = module.default;
+  });
+}
+
+export const GameBoard = ({
   props,
 }: {
   props: { initialBoard: string[]; gameId: string };
@@ -12,6 +21,12 @@ export const GameBoardWorking = ({
   const { gameId, initialBoard } = props;
   const [board, setBoard] = useState(initialBoard || Array(9).fill(null));
   const [currentLetter, setCurrentLetter] = useState('A');
+  const [isClient, setIsClient] = useState(false);
+
+  // Set isClient to true when component mounts on client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Always take the latest version from the server
   useEffect(() => {
@@ -35,11 +50,60 @@ export const GameBoardWorking = ({
     [gameId],
   );
 
+  // Check if all squares are filled with the same letter
+  const checkWinCondition = (boardToCheck: string[]) => {
+    // First check if all cells are filled
+    const allFilled = boardToCheck.every(cell => cell !== null && cell !== '');
+    
+    if (!allFilled) return false;
+    
+    // Then check if all cells have the same letter
+    const firstLetter = boardToCheck[0];
+    return boardToCheck.every(cell => cell === firstLetter);
+  };
+
+  // Celebrate win with confetti
+  const celebrateWin = () => {
+    if (!confetti || typeof window === 'undefined') {
+      // Fallback if confetti isn't available
+      alert(`Congratulations! You filled the board with all ${currentLetter}!`);
+      return;
+    }
+    
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    (function frame() {
+      confetti({
+        particleCount: 7,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0.05, y: 0.65 }
+      });
+      
+      confetti({
+        particleCount: 7,
+        angle: 120,
+        spread: 55,
+        origin: { x: 0.95, y: 0.65 }
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }());
+  };
+
   const handleCellClick = (index: number) => {
     const newBoard = [...board];
     newBoard[index] = currentLetter;
     setBoard(newBoard); // Always update local state
     debouncedUpdate(newBoard); // Send the latest version
+    
+    // Check for win condition after updating the board
+    if (checkWinCondition(newBoard)) {
+      celebrateWin();
+    }
   };
 
   const handleLetterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -51,8 +115,7 @@ export const GameBoardWorking = ({
 
   return (
     <div className="page-container">
-
-<style jsx>{`
+      <style jsx>{`
         .page-container {
           display: flex;
           flex-direction: column;
@@ -208,9 +271,8 @@ export const GameBoardWorking = ({
         }
       `}</style>
       
-      <InviteWidget />
+      {isClient && <InviteWidget />}
       
-
       <div className="game-info">
         <h1 className="game-title">Game: {gameId}</h1>
         <div className="player-letter">

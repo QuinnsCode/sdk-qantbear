@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import debounce from "lodash/debounce";
 import { updateBoard } from "./functions";
 import { InviteWidget } from "@/app/components/InviteWidget";
@@ -22,10 +22,16 @@ export const GameBoard = ({
   const [board, setBoard] = useState(initialBoard || Array(9).fill(null));
   const [currentLetter, setCurrentLetter] = useState('A');
   const [isClient, setIsClient] = useState(false);
+  const cellTimers = useRef<{[key: number]: NodeJS.Timeout}>({});
 
   // Set isClient to true when component mounts on client
   useEffect(() => {
     setIsClient(true);
+    
+    // Clear all timers when component unmounts
+    return () => {
+      Object.values(cellTimers.current).forEach(timer => clearTimeout(timer));
+    };
   }, []);
 
   // Always take the latest version from the server
@@ -73,6 +79,10 @@ export const GameBoard = ({
     const duration = 3000;
     const end = Date.now() + duration;
 
+    // Clear all timers when player wins
+    Object.values(cellTimers.current).forEach(timer => clearTimeout(timer));
+    cellTimers.current = {};
+
     (function frame() {
       confetti({
         particleCount: 7,
@@ -94,11 +104,33 @@ export const GameBoard = ({
     }());
   };
 
+  // Set a timer to clear a cell after delay
+  const setCellResetTimer = (index: number) => {
+    // Clear any existing timer for this cell
+    if (cellTimers.current[index]) {
+      clearTimeout(cellTimers.current[index]);
+    }
+    
+    // Set new timer to clear the cell after 5 seconds
+    cellTimers.current[index] = setTimeout(() => {
+      const newBoard = [...board];
+      newBoard[index] = null;
+      setBoard(newBoard);
+      debouncedUpdate(newBoard);
+      
+      // Remove the timer reference
+      delete cellTimers.current[index];
+    }, 5000);
+  };
+
   const handleCellClick = (index: number) => {
     const newBoard = [...board];
     newBoard[index] = currentLetter;
     setBoard(newBoard); // Always update local state
     debouncedUpdate(newBoard); // Send the latest version
+    
+    // Set timer to reset this cell
+    setCellResetTimer(index);
     
     // Check for win condition after updating the board
     if (checkWinCondition(newBoard)) {
@@ -208,12 +240,36 @@ export const GameBoard = ({
           cursor: pointer;
           transition: all 0.2s ease;
           box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+          position: relative;
         }
         
         .cell:hover {
           background-color: #f9f5e8;
           box-shadow: inset 0 0 15px rgba(0,0,0,0.15);
           transform: scale(0.98);
+        }
+        
+        .cell::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 2px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+        
+        .cell.active::after {
+          opacity: 1;
+          animation: fade-out 5s linear forwards;
+        }
+        
+        @keyframes fade-out {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
         }
         
         .loading {
@@ -242,6 +298,15 @@ export const GameBoard = ({
           display: flex;
           align-items: center;
           gap: 10px;
+        }
+
+        .game-rules {
+          margin-top: 20px;
+          font-family: 'Georgia', serif;
+          color: #5d4037;
+          text-align: center;
+          max-width: 90vmin;
+          font-size: 0.9rem;
         }
         
         @media (max-width: 768px) {
@@ -297,7 +362,7 @@ export const GameBoard = ({
             {board?.map((cell, index) => (
               <div 
                 key={index} 
-                className="cell"
+                className={`cell ${cell ? 'active' : ''}`}
                 onClick={() => handleCellClick(index)}
               >
                 {cell || ''}
@@ -305,6 +370,10 @@ export const GameBoard = ({
             ))}
           </div>
         </div>
+      </div>
+      
+      <div className="game-rules">
+        Fill all cells with the same letter to win! But hurry - each cell will reset after 5 seconds.
       </div>
     </div>
   );
