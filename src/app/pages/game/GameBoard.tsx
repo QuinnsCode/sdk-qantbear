@@ -18,6 +18,7 @@ export const GameBoard = ({
 }: {
   props: { initialBoard: string[]; gameId: string };
 }) => {
+  const COOLDOWN_AFTER_WIN_SECONDS = 30
   const { gameId, initialBoard } = props;
 
   //game state
@@ -33,7 +34,7 @@ export const GameBoard = ({
   const [hasWon, setHasWon] = useState(false);
   const [winTimestamp, setWinTimestamp] = useState<number | null>(null);
   const [cooldownSeconds, setCooldownSeconds] = useState<number | null>(null);
-  const winCooldownMs = 30 * 1000; // 30 seconds in milliseconds
+  const winCooldownMs = COOLDOWN_AFTER_WIN_SECONDS * 1000; // 30 seconds in milliseconds
 
   const cellTimers = useRef<{[key: number]: NodeJS.Timeout}>({});
 
@@ -131,7 +132,7 @@ export const GameBoard = ({
     const currentTime = Date.now();
     setHasWon(true);
     setWinTimestamp(currentTime);
-    setCooldownSeconds(60); // Start at 60 seconds
+    setCooldownSeconds(COOLDOWN_AFTER_WIN_SECONDS); // Start at 30 seconds
     
     // Clear all timers when player wins
     Object.values(cellTimers.current).forEach(timer => clearTimeout(timer));
