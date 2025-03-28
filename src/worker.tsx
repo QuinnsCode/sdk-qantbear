@@ -37,6 +37,20 @@ export default defineApp<Context>([
         },
       });
     }),
+    route("/game", () => {
+      const randomName = uniqueNamesGenerator({
+        dictionaries: [adjectives, colors, animals],
+        separator: "-",
+        length: 3,
+      });
+
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `/game/${randomName}`,
+        },
+      });
+    }),
     route("/note/:key", Note),
     route("/games/:gameId", Game),
     route("/game/:gameId", Game),
