@@ -5,13 +5,6 @@ import debounce from "lodash/debounce";
 import { updateBoard } from "./functions";
 import { InviteWidget } from "../../components/InviteWidget";
 import { gameStyles } from './styles';
-// Import confetti conditionally
-let confetti: any = null;
-
-// Check if window is defined (client-side only)
-if (typeof window !== 'undefined') {
-  confetti = require('canvas-confetti').default;
-}
 
 export const GameBoard = ({
   props,
@@ -63,32 +56,11 @@ export const GameBoard = ({
     return boardToCheck.every(cell => cell === firstLetter);
   };
 
-  // Celebrate win with confetti - only run client-side
+  // Celebrate win with an alert instead of confetti
   const celebrateWin = () => {
-    if (!confetti || typeof window === 'undefined') return;
-    
-    const duration = 3000;
-    const end = Date.now() + duration;
-
-    (function frame() {
-      confetti({
-        particleCount: 7,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0.05, y: 0.65 }
-      });
-      
-      confetti({
-        particleCount: 7,
-        angle: 120,
-        spread: 55,
-        origin: { x: 0.95, y: 0.65 }
-      });
-
-      if (Date.now() < end && typeof requestAnimationFrame === 'function') {
-        requestAnimationFrame(frame);
-      }
-    }());
+    if (typeof window !== 'undefined') {
+      alert('Congratulations! You filled the board with all ' + currentLetter + '!');
+    }
   };
 
   const handleCellClick = (index: number) => {
