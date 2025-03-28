@@ -19,9 +19,19 @@ export const GameBoard = ({
   props: { initialBoard: string[]; gameId: string };
 }) => {
   const { gameId, initialBoard } = props;
+
+  //game state
   const [board, setBoard] = useState(initialBoard || Array(9).fill(null));
+
+  //current player letter from the dropdown
   const [currentLetter, setCurrentLetter] = useState('A');
+
+  //check for hydration
   const [isClient, setIsClient] = useState(false);
+
+  // Add a state to track if we're already in a winning state
+  const [hasWon, setHasWon] = useState(false);
+
   const cellTimers = useRef<{[key: number]: NodeJS.Timeout}>({});
 
   // Set isClient to true when component mounts on client
@@ -56,7 +66,7 @@ export const GameBoard = ({
     [gameId],
   );
 
-  // Check if all squares are filled with the same letter
+  // Update the check win condition function
   const checkWinCondition = (boardToCheck: string[]) => {
     // First check if all cells are filled
     const allFilled = boardToCheck.every(cell => cell !== null && cell !== '');
@@ -68,8 +78,13 @@ export const GameBoard = ({
     return boardToCheck.every(cell => cell === firstLetter);
   };
 
-  // Celebrate win with confetti
+  // Update the celebrate win function
   const celebrateWin = () => {
+    // If we already celebrated this win, don't repeat
+    if (hasWon) return;
+    
+    setHasWon(true);
+    
     if (!confetti || typeof window === 'undefined') {
       // Fallback if confetti isn't available
       alert(`Congratulations! You filled the board with all ${currentLetter}!`);
@@ -101,7 +116,7 @@ export const GameBoard = ({
       if (Date.now() < end) {
         requestAnimationFrame(frame);
       }
-    }());
+      }());
   };
 
   const setCellResetTimer = (index: number) => {
