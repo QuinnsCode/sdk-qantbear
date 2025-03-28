@@ -33,7 +33,7 @@ export default defineApp<Context>([
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `/note/${randomName}`,
+          Location: `/game/${randomName}`,
         },
       });
     }),
