@@ -34,6 +34,7 @@
     "@redwoodjs/sdk": "0.0.24",
     "@simplewebauthn/browser": "^13.1.0",
     "@simplewebauthn/server": "^13.1.1",
+    "canvas-confetti": "^1.9.3",
     "lodash": "^4.17.21",
     "react": "19.0.0-rc-f2df5694-20240916",
     "react-dom": "19.0.0-rc-f2df5694-20240916",
@@ -41,6 +42,7 @@
     "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/lodash": "^4.17.13",
     "@types/node": "^22.13.11",
     "@types/react": "^18.3.12",
