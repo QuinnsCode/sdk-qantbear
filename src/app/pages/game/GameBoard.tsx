@@ -165,7 +165,7 @@ export const GameBoard = ({
     }());
   };
 
-  const setCellResetTimer = (index: number) => {
+  const setCellResetTimer = useCallback((index: number) => {
     // Clear any existing timer for this cell
     if (cellTimers.current[index]) {
       clearTimeout(cellTimers.current[index]);
@@ -186,7 +186,7 @@ export const GameBoard = ({
       // Remove the timer reference
       delete cellTimers.current[index];
     }, 5000);
-  };
+  }, [debouncedUpdate]);
 
   // Update cell click handler
   const handleCellClick = (index: number) => {
