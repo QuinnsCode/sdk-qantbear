@@ -44,30 +44,30 @@ export class BoardGameDurableObject extends DurableObject {
 
   // Initialize or retrieve the current game state
   async getGameState(): Promise<GameState> {
-    if (this.gameState) return this.gameState;
-    
     // Try to load from storage
     const storedState = await this.state.storage.get<GameState>("gameState");
     
     if (storedState) {
-      this.gameState = storedState;
-    } else {
-      // Initialize a new game state if none exists
-      this.gameState = {
-        players: [],
-        currentTurn: 0,
-        currentPhase: GamePhase.SETUP,
-        currentPlayerIndex: 0,
-        gameStarted: false,
-        gameOver: false,
-        winner: null,
-        board: {}, // Initialize with your board structure
-        lastUpdated: Date.now()
-      };
-      await this.saveGameState();
+      return storedState;
     }
+  
+    // If no stored state, create a new default game state
+    const newGameState: GameState = {
+      players: [],
+      currentTurn: 0,
+      currentPhase: GamePhase.SETUP,
+      currentPlayerIndex: 0,
+      gameStarted: false,
+      gameOver: false,
+      winner: null,
+      board: {},
+      lastUpdated: Date.now()
+    };
+  
+    // Save the new state to storage
+    await this.state.storage.put<GameState>("gameState", newGameState);
     
-    return this.gameState;
+    return newGameState;
   }
 
   // Save the current game state to storage

@@ -37,8 +37,15 @@ interface Board2210ADProps {
   gameId: string;
 }
 
-export const Board2210AD = ({ props }: { props: Board2210ADProps }) => {
-  const { initialGameState, gameId } = props;
+export const Board2210AD = ({
+  props,
+}: {
+  props: { 
+    initialGameState: GameState; 
+    gameId: string 
+  };
+}) => {
+  const { gameId, initialGameState } = props;
   
   // State for the game
   const [gameState, setGameState] = useState<GameState | null>(initialGameState);
@@ -82,11 +89,25 @@ export const Board2210AD = ({ props }: { props: Board2210ADProps }) => {
     };
     
     // Poll every 2 seconds
-    const intervalId = setInterval(fetchGameState, 2000);
+    // const intervalId = setInterval(fetchGameState, 2000);
     
-    return () => clearInterval(intervalId);
+    // return () => clearInterval(intervalId);
   }, [gameId]);
 
+ // Only update if the initialGameState is significantly different
+ useEffect(() => {
+  // Compare key aspects of the game state to prevent unnecessary updates
+  const stateChanged = gameState && (
+    initialGameState.currentTurn !== gameState.currentTurn ||
+    initialGameState.currentPhase !== gameState.currentPhase ||
+    initialGameState.players.length !== gameState.players.length
+  );
+  
+  if (stateChanged) {
+    setGameState(initialGameState);
+  }
+}, [initialGameState, gameState?.currentTurn, gameState?.currentPhase, gameState?.players.length]);
+  
   // Handle joining the game
   const handleJoinGame = async () => {
     if (!playerName.trim()) {
@@ -229,6 +250,7 @@ export const Board2210AD = ({ props }: { props: Board2210ADProps }) => {
     
     return currentPlayer ? currentPlayer.name : 'Unknown';
   };
+
 
   // Render login form if user hasn't joined yet
   if (!userId) {
