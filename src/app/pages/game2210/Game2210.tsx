@@ -1,4 +1,4 @@
-import { Board2210AD } from "../../components/Board2210AD";
+import { Board2210AD } from "./Board2210AD";
 import { getGameState } from "./boardGamefunctions";
 import { RouteContext } from "@redwoodjs/sdk/router";
 
