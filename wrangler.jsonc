@@ -3,7 +3,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
 
   // Worker name
-  "name": "rw-sdk-test-do",
+  "name": "qantbear-rwsdk",
 
   // Entry point
   "main": "src/worker.tsx",
@@ -30,19 +30,15 @@
         "class_name": "RealtimeDurableObject"
       },
       {
-        "name": "NOTE_DURABLE_OBJECT",
-        "class_name": "NoteDurableObject"
+        "name": "BOARD_GAME_DURABLE_OBJECT",
+        "class_name": "BoardGameDurableObject"
       },
-      {
-        "name": "GAME_DURABLE_OBJECT",
-        "class_name": "GameDurableObject"
-      }
     ]
   },
 
   // Environment variables
   "vars": {
-    "APP_NAME": "_rw-sdk-test-do"
+    "APP_NAME": "_qantbear-rwsdk"
   },
 
   // Migrations configuration
@@ -50,12 +46,8 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_classes": ["RealtimeDurableObject", "NoteDurableObject"]
+      "new_classes": ["RealtimeDurableObject", "BoardGameDurableObject"]
     },
-    {
-      "tag": "v2",
-      "new_classes": ["GameDurableObject"]
-    }
   ],
   
 
@@ -63,8 +55,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "swanky-onsite-db2",
-      "database_id": "f5bf3e46-5a51-4412-908d-57b747e7c2e8"
+      "database_name": "qantbear-d1",
+      "database_id": "4d44f0b7-6670-4304-9c95-0bce6f382ef1"
     }
   ]
 }
