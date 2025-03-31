@@ -26,11 +26,11 @@ export default defineApp<Context>([
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `/board-game/${randomName}`,
+          Location: `/boardGame/${randomName}`,
         },
       });
     }),
-    route("/board-game", () => {
+    route("/boardGame", () => {
       const randomName = uniqueNamesGenerator({
         dictionaries: [adjectives, colors, animals],
         separator: "-",
@@ -40,16 +40,16 @@ export default defineApp<Context>([
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `/board-game/${randomName}`,
+          Location: `/boardGame/${randomName}`,
         },
       });
     }),
-    route("/board-game/:gameId", Game),
+    route("/boardGame/:gameId", Game),
     //
     // Game API routes
     //
     // Register a player
-    route('/api/board-game/:gameId/register', async (ctx) => {
+    route('/api/boardGame/:gameId/register', async (ctx) => {
       const gameId = ctx.params.gameId;
       let proposedUserId;
 
@@ -92,7 +92,7 @@ export default defineApp<Context>([
     }),
 
     // Get game state
-    route('/api/board-game/:gameId/state', async (ctx) => {
+    route('/api/boardGame/:gameId/state', async (ctx) => {
       const gameId = ctx.params.gameId;
 
       try {
@@ -128,7 +128,7 @@ export default defineApp<Context>([
     }),
 
     // Update game board
-    route('/api/board-game/:gameId/update', async (ctx) => {
+    route('/api/boardGame/:gameId/update', async (ctx) => {
       const gameId = ctx.params.gameId;
       const { userId, boardUpdate } = await ctx.request.json();
 
@@ -173,7 +173,7 @@ export default defineApp<Context>([
       });
     }),
 
-    route('/api/board-game-test', async (ctx) => {
+    route('/api/boardGameTest', async (ctx) => {
       try {
         const doId = ctx.env.BOARD_GAME_DURABLE_OBJECT.idFromName('test-game');
         const gameDO = ctx.env.BOARD_GAME_DURABLE_OBJECT.get(doId);

@@ -1,25 +1,7 @@
-//RW_TODO: I Have to use this @/app/pages/game/BoardGame here but not on other app
-// import { BoardGame } from "@/app/pages/game/BoardGame";
-// import { getGameState } from "./functions";
-// import { RouteContext } from "@redwoodjs/sdk/router";
-
-// const Game = async (ctx: RouteContext) => {
-//   const gameId = ctx.params.gameId;
-//   try {
-//     const gameState = await getGameState(gameId, ctx);
-//     // Ensure serializable state
-//     const safeGameState = JSON.parse(JSON.stringify(gameState || {}));
-//     return <BoardGame props={{ initialGameState: safeGameState, gameId }} />;
-//   } catch (error) {
-//     console.error("Error loading game:", error);
-//     return <div>Error loading game: {String(error)}</div>;
-//   }
-// };
-
-// export default Game;
-
 // import { Static } from '@/app/pages/game/Static';
-import { BoardGame } from "./BoardGame";
+//RW_TODO: BELOW DID NOW WORK 
+// import { BoardGame } from "./BoardGame";
+import { BoardGame } from "@/app/pages/game/BoardGame";
 import { getGameState } from "./functions";
 import { RouteContext } from "@redwoodjs/sdk/router";
 
