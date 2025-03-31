@@ -18,7 +18,8 @@
 
 // export default Game;
 
-import { Static } from '@/app/pages/game/Static';
+// import { Static } from '@/app/pages/game/Static';
+import { BoardGame } from "./BoardGame";
 import { getGameState } from "./functions";
 import { RouteContext } from "@redwoodjs/sdk/router";
 
@@ -31,7 +32,7 @@ const Game = async (ctx: RouteContext) => {
     // Ensure we have a serializable object
     const safeGameState = JSON.parse(JSON.stringify(gameState || {}));
     
-    return <Static props={{ initialGameState: safeGameState, gameId }} />;
+    return <BoardGame props={{ initialGameState: safeGameState, gameId }} />;
   } catch (error) {
     // Add error handling to help diagnose issues
     console.error("Error in Game component:", error);

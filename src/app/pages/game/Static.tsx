@@ -19,7 +19,6 @@ export const Static = ({
       <pre style={{ background: '#f0f0f0', padding: '10px' }}>
         {JSON.stringify({
           gameId,
-          // Only log basic properties to avoid circular references
           stateInfo: initialGameState ? {
             players: initialGameState.players?.length || 0,
             phase: initialGameState.currentPhase,
