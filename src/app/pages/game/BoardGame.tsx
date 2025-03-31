@@ -9,16 +9,7 @@ interface Player {
   isActive: boolean;
 }
 
-enum GamePhase {
-  SETUP = 'setup',
-  PHASE_1 = 'phase_1',
-  PHASE_2 = 'phase_2',
-  PHASE_3 = 'phase_3',
-  PHASE_4 = 'phase_4',
-  PHASE_5 = 'phase_5',
-  PHASE_6 = 'phase_6',
-  GAME_OVER = 'game_over'
-}
+type GamePhase = 'setup' | 'phase_1' | 'phase_2' | 'phase_3' | 'phase_4' | 'phase_5' | 'phase_6' | 'game_over';
 
 interface GameState {
   players: Player[];
@@ -218,17 +209,17 @@ export const BoardGame = ({
 
   // Helper function to get the display name for the current phase
   const getPhaseDisplayName = (phase: GamePhase): string => {
-    switch (phase) {
-      case GamePhase.SETUP: return 'Setup';
-      case GamePhase.PHASE_1: return 'Phase 1';
-      case GamePhase.PHASE_2: return 'Phase 2';
-      case GamePhase.PHASE_3: return 'Phase 3';
-      case GamePhase.PHASE_4: return 'Phase 4';
-      case GamePhase.PHASE_5: return 'Phase 5';
-      case GamePhase.PHASE_6: return 'Phase 6';
-      case GamePhase.GAME_OVER: return 'Game Over';
-      default: return 'Unknown';
-    }
+    const phaseNames: Record<GamePhase, string> = {
+      'setup': 'Setup',
+      'phase_1': 'Phase 1',
+      'phase_2': 'Phase 2',
+      'phase_3': 'Phase 3',
+      'phase_4': 'Phase 4',
+      'phase_5': 'Phase 5',
+      'phase_6': 'Phase 6',
+      'game_over': 'Game Over'
+    };
+    return phaseNames[phase] || 'Unknown';
   };
 
   // Check if it's the current user's turn

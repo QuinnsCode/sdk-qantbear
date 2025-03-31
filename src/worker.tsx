@@ -48,7 +48,6 @@ export default defineApp<Context>([
     //
     // Game API routes
     //
-
     // Register a player
     route('/api/board-game/:gameId/register', async (ctx) => {
       const gameId = ctx.params.gameId;

@@ -1,5 +1,5 @@
-import { BoardGame } from "./BoardGame";  
-import { getGameState } from "./boardGamefunctions";
+import { BoardGame } from "./BoardGame";
+import { getGameState } from "./functions";
 import { RouteContext } from "@redwoodjs/sdk/router";
 
 const Game = async (ctx: RouteContext) => {
