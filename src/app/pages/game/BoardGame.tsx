@@ -37,7 +37,7 @@ interface Board2210ADProps {
   gameId: string;
 }
 
-export const Board2210AD = ({
+export const BoardGame = ({
   props,
 }: {
   props: { 
