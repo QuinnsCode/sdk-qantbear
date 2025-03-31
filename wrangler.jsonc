@@ -47,7 +47,7 @@
     {
       "tag": "v1",
       "new_classes": ["RealtimeDurableObject", "BoardGameDurableObject"]
-    },
+    }
   ],
   
 
